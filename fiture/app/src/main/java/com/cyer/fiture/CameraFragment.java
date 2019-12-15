@@ -9,11 +9,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -55,12 +58,15 @@ public class CameraFragment extends Fragment {
 
     private int i;
 
+    public int gItemPos;
+
     private ChooseActivity chooseActivity;
 
     private ArrayList<String> pathList;
     private ImageView ivPreview;
     private ImageButton btnPublish;
 
+    private RecyclerView recyclerView;
     private OnFragmentInteractionListener mListener;
 
     public CameraFragment() {
@@ -111,7 +117,7 @@ public class CameraFragment extends Fragment {
         //图片预览区
         ivPreview=v.findViewById(R.id.iv_preview);
         file = new File(pathList.get(0));
-        Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
+        Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).centerCrop().into(ivPreview);
 
         //编辑按钮
         Button btnCut=v.findViewById(R.id.btn_cut);
@@ -123,8 +129,23 @@ public class CameraFragment extends Fragment {
             }
         });
 
-        LinearLayout gallery = (LinearLayout) v.findViewById(R.id.id_gallery);
+        gItemPos=0;
 
+        recyclerView =v.findViewById(R.id.rv_gallery);
+        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(getContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(new GalleryAdapter(getContext(), new GalleryAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(int i) {
+                file = new File(pathList.get(i));
+                gItemPos=i;
+                Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).centerCrop().into(ivPreview);
+                Toast.makeText(chooseActivity,i+"",Toast.LENGTH_SHORT).show();
+            }
+        }, pathList));
+
+        /*LinearLayout gallery = (LinearLayout) v.findViewById(R.id.id_gallery);
         gallery.removeAllViews();  //clear linearlayout
         for (i = 0; i < pathList.size(); i++) {
             ImageView imageView = new ImageView(getContext());
@@ -143,7 +164,7 @@ public class CameraFragment extends Fragment {
             gallery.addView(imageView);
             //imageView.setImageResource(R.drawable.ic_launcher); //图片资源
             //Layout.addView(imageView); //动态添加图片
-        }
+        }*/
 
         btnPublish=v.findViewById(R.id.btn_publish);
         btnPublish.setOnClickListener(new View.OnClickListener() {

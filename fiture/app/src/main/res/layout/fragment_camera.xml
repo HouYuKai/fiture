@@ -76,12 +76,13 @@
 
 
         <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_gallery"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:background="@color/colorTitle"/>
 
 <!--        图片选择区-->
-        <HorizontalScrollView
+        <!--<HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_gravity="bottom"
@@ -93,12 +94,7 @@
                 android:layout_gravity="center_vertical"
                 android:orientation="horizontal" >
             </LinearLayout>
-
-            <!--<TextView
-                android:id="@+id/result"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />-->
-        </HorizontalScrollView>
+        </HorizontalScrollView>-->
 
 
     </LinearLayout>
