@@ -196,29 +196,27 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
 
         }
         if(resultCode == RESULT_OK){
-                mSelectPath = data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
-
-
-                /*if (!mSelectPath.isEmpty()){
-                    DisplayMetrics dm = getResources().getDisplayMetrics();
-                    int screenWidth = dm.widthPixels;
-                    //int screenHeight = dm.heightPixels;
-                    Bitmap bt = BitmapFactory.decodeFile(mSelectPath.get(0));
-                    mPreviewImage.setImageBitmap(ThumbnailUtils.extractThumbnail(bt,screenWidth,screenWidth));
-
-                }*/
-
-                StringBuilder sb = new StringBuilder();
-                for(String p: mSelectPath){
-                    sb.append(p);
-                    sb.append("\n");
+            ArrayList<String> tmpList=data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
+            if (tmpList!=null){
+                if (!tmpList.isEmpty()){
+                    mSelectPath=tmpList;
+                    StringBuilder sb = new StringBuilder();
+                    for(String p: mSelectPath){
+                        sb.append(p);
+                        sb.append("\n");
+                    }
+                    showToast(sb.toString());
+                    toPublishFrag();
                 }
-
-
-                showToast(sb.toString());
-
-                toPublishFrag();
+            }else{
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.frcontainer,CameraFragment.newInstance("1","2"))
+                        .commit();
             }
+
+        }
+
     }
 
     public void setSelectPath(ArrayList<String> list){
@@ -230,6 +228,10 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
             sb.append("\n");
         }
         showToast(sb.toString());
+    }
+
+    public ArrayList<String> getSelectPath(){
+        return mSelectPath;
     }
 
     private void toPublishFrag() {

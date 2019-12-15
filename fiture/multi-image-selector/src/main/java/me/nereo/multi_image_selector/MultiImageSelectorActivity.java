@@ -91,9 +91,9 @@ public class MultiImageSelectorActivity extends AppCompatActivity
                 public void onClick(View view) {
                     if(resultList != null && resultList.size() >0){
                         // Notify success
-                        Intent data = new Intent();
-                        data.putStringArrayListExtra(EXTRA_RESULT, resultList);
-                        setResult(RESULT_OK, data);
+                        Intent intent = new Intent();
+                        intent.putStringArrayListExtra(EXTRA_RESULT, resultList);
+                        setResult(RESULT_OK, intent);
                     }else{
                         setResult(RESULT_CANCELED);
                     }
