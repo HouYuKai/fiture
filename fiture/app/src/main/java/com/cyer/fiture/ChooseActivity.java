@@ -1,6 +1,7 @@
 package com.cyer.fiture;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,12 +10,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.SpannableString;
@@ -27,6 +30,7 @@ import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
@@ -38,7 +42,7 @@ import java.util.ArrayList;
 import me.nereo.multi_image_selector.MultiImageSelector;
 
 
-public class ChooseActivity extends AppCompatActivity {
+public class ChooseActivity extends AppCompatActivity implements CameraFragment.OnFragmentInteractionListener{
 
     private static final int REQUEST_IMAGE = 2;
     protected static final int REQUEST_STORAGE_READ_ACCESS_PERMISSION = 101;
@@ -85,15 +89,27 @@ public class ChooseActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onFragmentInteraction(Uri uri) {
+        Toast.makeText(ChooseActivity.this,"this is："+uri,Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         setContentView(R.layout.activity_choose);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
 
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(R.id.frcontainer,Camera2BasicFragment.newInstance(),"f1")
+                //.addToBackStack("")
                 .commit();
-
 
         //mResultText = findViewById(R.id.result);
         //mPreviewImage=findViewById(R.id.iv_preview);
@@ -177,27 +193,65 @@ public class ChooseActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQUEST_IMAGE){
-            /*if(resultCode == RESULT_OK){
+
+        }
+        if(resultCode == RESULT_OK){
                 mSelectPath = data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
 
 
-                if (!mSelectPath.isEmpty()){
+                /*if (!mSelectPath.isEmpty()){
                     DisplayMetrics dm = getResources().getDisplayMetrics();
                     int screenWidth = dm.widthPixels;
                     //int screenHeight = dm.heightPixels;
                     Bitmap bt = BitmapFactory.decodeFile(mSelectPath.get(0));
                     mPreviewImage.setImageBitmap(ThumbnailUtils.extractThumbnail(bt,screenWidth,screenWidth));
 
-                }
+                }*/
 
                 StringBuilder sb = new StringBuilder();
                 for(String p: mSelectPath){
                     sb.append(p);
                     sb.append("\n");
                 }
-                mResultText.setText(sb.toString());
-            }*/
+
+
+                showToast(sb.toString());
+
+                toPublishFrag();
+            }
+    }
+
+    public void setSelectPath(ArrayList<String> list){
+        mSelectPath=list;
+
+        StringBuilder sb = new StringBuilder();
+        for(String p: mSelectPath){
+            sb.append(p);
+            sb.append("\n");
+        }
+        showToast(sb.toString());
+    }
+
+    private void toPublishFrag() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frcontainer,CameraFragment.newInstance("1","2"))
+                .addToBackStack("")
+                .commit();
+    }
+
+    private void showToast(final String text) {
+        final Activity activity = this;
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(activity, text, Toast.LENGTH_LONG).show();
+                }
+            });
         }
     }
+
+
 
 }

@@ -796,6 +796,20 @@ public class Camera2BasicFragment extends Fragment
         }
     }
 
+    private void toPublishFrag() {
+        ChooseActivity ca = (ChooseActivity) getActivity();
+        ArrayList<String> list=new ArrayList<String>();
+        list.add(mFile.toString());
+        ca.setSelectPath(list);
+
+
+        getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frcontainer,CameraFragment.newInstance("1","2"))
+                .addToBackStack("")
+                .commit();
+    }
+
     /**
      * Run the precapture sequence for capturing a still image. This method should be called when
      * we get a response in {@link #mCaptureCallback} from {@link #lockFocus()}.
@@ -857,6 +871,8 @@ public class Camera2BasicFragment extends Fragment
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
+
+        toPublishFrag();
     }
 
     /**

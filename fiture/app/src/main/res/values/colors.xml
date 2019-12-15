@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimary">#6F73E9</color>
+    <color name="colorBack">#D4D5F3</color>
+    <color name="colorWhite">#FFFFFF</color>
+
+    <color name="colorTitle">#000000</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="colorTwitterBlue">#1da1f2</color>
+    <color name="colorBlue">#1499EB</color>
+
 </resources>

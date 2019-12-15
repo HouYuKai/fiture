@@ -21,7 +21,7 @@ import androidx.navigation.ui.NavigationUI;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnPost;
+    //private Button btnPost;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        btnPost=findViewById(R.id.btnPost);
+        /*btnPost=findViewById(R.id.btnPost);
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                         .addToBackStack(null)  //将当前fragment加入到返回栈中
                         .replace(R.id.container, fragment).commit();
             }
-        });
+        });*/
     }
 
 
