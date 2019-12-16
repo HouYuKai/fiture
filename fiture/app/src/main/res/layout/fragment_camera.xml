@@ -34,28 +34,51 @@
 
         </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="wrqefq"/>
-        <!-- <android.support.design.widget.TextInputLayout
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content">
-             <EditText
-                 android:id="@+id/ed_desc"
-                 android:layout_width="match_parent"
-                 android:hint="添加描述"
-                 android:layout_height="wrap_content" />
-         </android.support.design.widget.TextInputLayout>-->
+            android:layout_margin="8dp"
+            android:background="@drawable/ed_desc_background"
+            >
+            <EditText
+                android:id="@+id/ed_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="添加描述"
+                android:padding="4dp"
+                android:gravity="top"
+                android:maxLength="140"
+                android:minLines="4"
+                android:maxLines="4"
+                android:background="@null"
+                />
+            <TextView
+                android:id="@+id/tv_desc_wordcount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/ed_desc"
+                android:paddingBottom="4dp"
+                android:paddingRight="16dp"
+                android:text="0/140"
+                android:textColor="#B4B4B4"
+                android:textSize="14sp"/>
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1">
-            <ImageView
-                android:id="@+id/iv_preview"
+
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:id="@+id/iv_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </ScrollView>
+
             <Button
                 android:id="@+id/btn_cut"
                 android:layout_width="wrap_content"
@@ -69,35 +92,13 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:text="filter"/>
-
         </RelativeLayout>
 
-
-
-
+        <!--        图片选择区-->
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_gallery"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:background="@color/colorTitle"/>
-
-<!--        图片选择区-->
-        <!--<HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_gravity="bottom"
-            >
-            <LinearLayout
-                android:id="@+id/id_gallery"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:orientation="horizontal" >
-            </LinearLayout>
-        </HorizontalScrollView>-->
-
-
     </LinearLayout>
-
-
 </FrameLayout>

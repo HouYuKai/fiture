@@ -31,6 +31,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
@@ -97,6 +98,7 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         setContentView(R.layout.activity_choose);
 
@@ -205,7 +207,7 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
                         sb.append(p);
                         sb.append("\n");
                     }
-                    showToast(sb.toString());
+                    //showToast(sb.toString());
                     toPublishFrag();
                 }
             }else{

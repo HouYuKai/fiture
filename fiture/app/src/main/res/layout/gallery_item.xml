@@ -8,13 +8,9 @@
     >
     <!--android:clickable="true"
     android:focusableInTouchMode="true"
-    android:focusable="true"-->
-<!--    android:background="@drawable/gitem_border"-->
-    <!--<TextView
-        android:id="@+id/tv_gi"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:textColor="@color/colorWhite"/>-->
+    android:focusable="true"
+    android:background="@drawable/gitem_border"-->
+
     <ImageView
         android:id="@+id/iv_gitem"
         android:layout_width="match_parent"

@@ -11,13 +11,16 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.TextPaint;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -61,6 +64,9 @@ public class CameraFragment extends Fragment {
     public int gItemPos;
 
     private ChooseActivity chooseActivity;
+
+    private EditText edDesc;
+    private TextView tvWordcount;
 
     private ArrayList<String> pathList;
     private ImageView ivPreview;
@@ -114,10 +120,27 @@ public class CameraFragment extends Fragment {
         TextPaint tp = titleEdit.getPaint();
         tp.setFakeBoldText(true);
 
+        //Description
+        edDesc=v.findViewById(R.id.ed_desc);
+        tvWordcount=v.findViewById(R.id.tv_desc_wordcount);
+        edDesc.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+                int len=s.length();
+                tvWordcount.setText(len+"/140");
+            }
+        });
         //图片预览区
         ivPreview=v.findViewById(R.id.iv_preview);
         file = new File(pathList.get(0));
-        Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).centerCrop().into(ivPreview);
+//        Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).centerCrop().into(ivPreview);
+        Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
 
         //编辑按钮
         Button btnCut=v.findViewById(R.id.btn_cut);
@@ -129,8 +152,8 @@ public class CameraFragment extends Fragment {
             }
         });
 
+        //图片选择区
         gItemPos=0;
-
         recyclerView =v.findViewById(R.id.rv_gallery);
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -138,10 +161,9 @@ public class CameraFragment extends Fragment {
         recyclerView.setAdapter(new GalleryAdapter(getContext(), new GalleryAdapter.OnItemClickListener() {
             @Override
             public void onClick(int i) {
-                file = new File(pathList.get(i));
                 gItemPos=i;
-                Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).centerCrop().into(ivPreview);
-                //Toast.makeText(chooseActivity,i+"",Toast.LENGTH_SHORT).show();
+                file = new File(pathList.get(i));
+                Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
             }
         }, pathList));
 
@@ -212,7 +234,6 @@ public class CameraFragment extends Fragment {
         return bitmap;
     }
 
-    // http://blog.sina.com.cn/s/blog_5de73d0b0100zfm8.html
     private static void resolveUri(Context context, Uri uri, BitmapFactory.Options options) {
         if (uri == null) {
             return;
@@ -243,7 +264,6 @@ public class CameraFragment extends Fragment {
         }
     }
 
-    // http://blog.sina.com.cn/s/blog_5de73d0b0100zfm8.html
     private static Bitmap resolveUriForBitmap(Context context, Uri uri, BitmapFactory.Options options) {
         if (uri == null) {
             return null;
