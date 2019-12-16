@@ -22,12 +22,15 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.LinearVi
     private ArrayList<String> mList;
     private int pos;
 
+    private boolean isInit;
+
     public GalleryAdapter(Context context,OnItemClickListener listener,ArrayList<String> list){
         mContext=context;
         mListener=listener;
         mList=list;
 
         pos=0;
+        isInit=true;
     }
 
     @NonNull
@@ -38,14 +41,22 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.LinearVi
 
     @Override
     public void onBindViewHolder(@NonNull final GalleryAdapter.LinearViewHolder viewHolder, final int i) {
-        File file = new File(mList.get(i));
+        if (isInit){
+            File file = new File(mList.get(i));
+            Glide.with(mContext).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).centerCrop().into(viewHolder.iv);
+        }
+        if (i== mList.size()-1){
+            isInit=false;
+        }
+
         /*设置选中状态*/
         if (pos == i) {
+            File file = new File(mList.get(i));
             viewHolder.itemView.setBackgroundResource(R.drawable.gitem_border);
+            Glide.with(mContext).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).centerCrop().into(viewHolder.iv);
         } else {
             viewHolder.itemView.setBackgroundResource(R.drawable.gitem_border_tr);
         }
-        Glide.with(mContext).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(viewHolder.iv);
 
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

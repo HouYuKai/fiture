@@ -92,6 +92,11 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
     private void saveImage() {
         String fileName = getIntent().getIntExtra("pos",0) + ".jpg";
 
+        File file=new File(getExternalFilesDir(null).toString()+fileName);
+        if (file.exists()){
+            file.delete();
+        }
+
         mGPUImageView.saveToPictures(getExternalFilesDir(null).toString(), fileName, mOnPictureSavedListener);
 
 //        mGPUImageView.saveToPictures("GPUImage", fileName, mOnPictureSavedListener);

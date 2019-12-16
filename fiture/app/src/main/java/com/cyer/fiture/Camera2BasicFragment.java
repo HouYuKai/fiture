@@ -41,7 +41,6 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -805,7 +804,7 @@ public class Camera2BasicFragment extends Fragment
 
         getActivity().getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.frcontainer,CameraFragment.newInstance("1","2"))
+                .replace(R.id.frcontainer, PostEditFragment.newInstance("1","2"))
                 .addToBackStack("")
                 .commit();
     }
@@ -942,7 +941,7 @@ public class Camera2BasicFragment extends Fragment
 
             selector.multi();
             selector.origin(mSelectPath);
-            selector.start(this, 2);
+            selector.start(getActivity(), 2);
 
     }
 

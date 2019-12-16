@@ -24,7 +24,7 @@ public class MyFragmentPagerAdapter extends FragmentPagerAdapter {
                 return Camera2BasicFragment.newInstance();
 
             case 1:
-//                return CameraFragment.newInstance("param1","param2");
+//                return PostEditFragment.newInstance("param1","param2");
                 //return Camera2BasicFragment.newInstance();
         }
         return null;

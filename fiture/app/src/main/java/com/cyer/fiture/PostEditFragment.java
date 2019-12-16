@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -18,12 +17,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,23 +28,22 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
-
-import me.nereo.multi_image_selector.bean.Image;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link CameraFragment.OnFragmentInteractionListener} interface
+ * {@link PostEditFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link CameraFragment#newInstance} factory method to
+ * Use the {@link PostEditFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CameraFragment extends Fragment {
+public class PostEditFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -72,10 +68,11 @@ public class CameraFragment extends Fragment {
     private ImageView ivPreview;
     private ImageButton btnPublish;
 
+    private GalleryAdapter galleryAdapter;
     private RecyclerView recyclerView;
     private OnFragmentInteractionListener mListener;
 
-    public CameraFragment() {
+    public PostEditFragment() {
         // Required empty public constructor
     }
 
@@ -85,11 +82,11 @@ public class CameraFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment CameraFragment.
+     * @return A new instance of fragment PostEditFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CameraFragment newInstance(String param1, String param2) {
-        CameraFragment fragment = new CameraFragment();
+    public static PostEditFragment newInstance(String param1, String param2) {
+        PostEditFragment fragment = new PostEditFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -107,13 +104,60 @@ public class CameraFragment extends Fragment {
         }
     }
 
+    public boolean copyFile(String oldPath$Name, String newPath$Name) {
+        try {
+            File oldFile = new File(oldPath$Name);
+            if (!oldFile.exists()) {
+                Log.e("--Method--", "copyFile:  oldFile not exist.");
+                return false;
+            } else if (!oldFile.isFile()) {
+                Log.e("--Method--", "copyFile:  oldFile not file.");
+                return false;
+            } else if (!oldFile.canRead()) {
+                Log.e("--Method--", "copyFile:  oldFile cannot read.");
+                return false;
+            }
+
+            /* 如果不需要打log，可以使用下面的语句
+            if (!oldFile.exists() || !oldFile.isFile() || !oldFile.canRead()) {
+                return false;
+            }
+            */
+
+            FileInputStream fileInputStream = new FileInputStream(oldPath$Name);
+            FileOutputStream fileOutputStream = new FileOutputStream(newPath$Name);
+            byte[] buffer = new byte[1024];
+            int byteRead;
+            while (-1 != (byteRead = fileInputStream.read(buffer))) {
+                fileOutputStream.write(buffer, 0, byteRead);
+            }
+            fileInputStream.close();
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_camera, container, false);
         chooseActivity=(ChooseActivity) getActivity();
-        pathList=chooseActivity.getSelectPath();
+
+        pathList=new ArrayList<String>();
+        for (int i=0;i<chooseActivity.getSelectPath().size();i++){
+            String newPath=getActivity().getExternalFilesDir(null).toString()+"/"+i+".jpg";
+            copyFile(chooseActivity.getSelectPath().get(i),newPath);
+            pathList.add(newPath);
+//            chooseActivity.getSelectPath().get(i);
+        }
+        chooseActivity.setSelectPath(pathList);
+
+        //pathList=chooseActivity.getSelectPath();
 
         //设置标题栏
         TextView titleEdit= v.findViewById(R.id.tv_titleEdit);
@@ -159,7 +203,7 @@ public class CameraFragment extends Fragment {
                 Intent intent = new Intent(chooseActivity, FilterActivity.class);
                 intent.putExtra("originPath", pathList.get(gItemPos));
                 intent.putExtra("pos", gItemPos);
-                startActivityForResult(intent,4);
+                chooseActivity.startActivityForResult(intent,4);
                 //startActivity(intent);
             }
         });
@@ -170,14 +214,17 @@ public class CameraFragment extends Fragment {
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(new GalleryAdapter(getContext(), new GalleryAdapter.OnItemClickListener() {
+
+        galleryAdapter=new GalleryAdapter(getContext(), new GalleryAdapter.OnItemClickListener() {
             @Override
             public void onClick(int i) {
                 gItemPos=i;
                 file = new File(pathList.get(i));
                 Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
             }
-        }, pathList));
+        }, pathList);
+
+        recyclerView.setAdapter(galleryAdapter);
 
         btnPublish=v.findViewById(R.id.btn_publish);
         btnPublish.setOnClickListener(new View.OnClickListener() {
@@ -203,9 +250,26 @@ public class CameraFragment extends Fragment {
         // outputX outputY 是裁剪图片宽高
         /*intent.putExtra("outputX", 150);
         intent.putExtra("outputY", 150);*/
-
+        //intent.putExtra("editingPos",gItemPos);
         intent.putExtra("return-data", true);
-        startActivityForResult(intent, 3);
+        chooseActivity.startActivityForResult(intent, 3);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        file = new File(pathList.get(gItemPos));
+        //Toast.makeText(chooseActivity,"DO",Toast.LENGTH_SHORT).show();
+        Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
+
+        galleryAdapter.notifyItemChanged(gItemPos);
+        /*if (requestCode==3){
+            Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
+
+        }
+        if(requestCode == 4){//滤镜
+            Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
+
+        }*/
     }
 
     /**

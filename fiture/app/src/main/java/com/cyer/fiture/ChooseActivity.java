@@ -5,37 +5,26 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.ViewPager;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -43,7 +32,7 @@ import java.util.ArrayList;
 import me.nereo.multi_image_selector.MultiImageSelector;
 
 
-public class ChooseActivity extends AppCompatActivity implements CameraFragment.OnFragmentInteractionListener{
+public class ChooseActivity extends AppCompatActivity implements PostEditFragment.OnFragmentInteractionListener{
 
     private static final int REQUEST_IMAGE = 2;
     protected static final int REQUEST_STORAGE_READ_ACCESS_PERMISSION = 101;
@@ -181,7 +170,7 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //showToast("REQUEST: "+requestCode);
-        if(requestCode == 65538){
+        if(requestCode == REQUEST_IMAGE){
             if(resultCode == RESULT_OK){
                 ArrayList<String> tmpList=data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
                 if (tmpList!=null){
@@ -199,21 +188,19 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
             }
         }
 
+        Fragment fr=getSupportFragmentManager().findFragmentByTag("postedit");
         if(requestCode == 3){
-                getSupportFragmentManager()
+                /*getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.frcontainer,CameraFragment.newInstance("1","2"))
-                        .commit();
-
+                        .replace(R.id.frcontainer, PostEditFragment.newInstance("1","2"),"f1")
+                        .commit();*/
+                //showToast("do3");
+                fr.onActivityResult(requestCode,resultCode,data);
         }
 
         if(requestCode == 4){//滤镜
-            if(resultCode == RESULT_OK){
-
-            }
+            fr.onActivityResult(requestCode,resultCode,data);
         }
-
-
     }
 
     public void setSelectPath(ArrayList<String> list){
@@ -224,7 +211,7 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
             sb.append(p);
             sb.append("\n");
         }
-        showToast(sb.toString());
+        //showToast(sb.toString());
     }
 
     public ArrayList<String> getSelectPath(){
@@ -234,7 +221,7 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
     private void toPublishFrag() {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.frcontainer,CameraFragment.newInstance("1","2"))
+                .replace(R.id.frcontainer, PostEditFragment.newInstance("1","2"),"postedit")
                 .addToBackStack("")
                 .commit();
     }
