@@ -112,20 +112,6 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
                 .add(R.id.frcontainer,Camera2BasicFragment.newInstance(),"f1")
                 //.addToBackStack("")
                 .commit();
-
-        //mResultText = findViewById(R.id.result);
-        //mPreviewImage=findViewById(R.id.iv_preview);
-
-
-        /*ViewPager viewPager = findViewById(R.id.view_pager);
-        MyFragmentPagerAdapter adapter = new MyFragmentPagerAdapter(getSupportFragmentManager(),
-                this);
-        viewPager.setAdapter(adapter);
-        //TabLayout
-        TabLayout tabLayout = findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);*/
-
-
     }
 
     private void pickImage() {
@@ -194,30 +180,39 @@ public class ChooseActivity extends AppCompatActivity implements CameraFragment.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == REQUEST_IMAGE){
-
-        }
-        if(resultCode == RESULT_OK){
-            ArrayList<String> tmpList=data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
-            if (tmpList!=null){
-                if (!tmpList.isEmpty()){
-                    mSelectPath=tmpList;
-                    StringBuilder sb = new StringBuilder();
-                    for(String p: mSelectPath){
-                        sb.append(p);
-                        sb.append("\n");
+        //showToast("REQUEST: "+requestCode);
+        if(requestCode == 65538){
+            if(resultCode == RESULT_OK){
+                ArrayList<String> tmpList=data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
+                if (tmpList!=null){
+                    if (!tmpList.isEmpty()){
+                        mSelectPath=tmpList;
+                        StringBuilder sb = new StringBuilder();
+                        for(String p: mSelectPath){
+                            sb.append(p);
+                            sb.append("\n");
+                        }
+                        //showToast(sb.toString());
+                        toPublishFrag();
                     }
-                    //showToast(sb.toString());
-                    toPublishFrag();
                 }
-            }else{
+            }
+        }
+
+        if(requestCode == 3){
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.frcontainer,CameraFragment.newInstance("1","2"))
                         .commit();
-            }
 
         }
+
+        if(requestCode == 4){//滤镜
+            if(resultCode == RESULT_OK){
+
+            }
+        }
+
 
     }
 

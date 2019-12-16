@@ -152,6 +152,18 @@ public class CameraFragment extends Fragment {
             }
         });
 
+        Button btnFilter=v.findViewById(R.id.btn_filter);
+        btnFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(chooseActivity, FilterActivity.class);
+                intent.putExtra("originPath", pathList.get(gItemPos));
+                intent.putExtra("pos", gItemPos);
+                startActivityForResult(intent,4);
+                //startActivity(intent);
+            }
+        });
+
         //图片选择区
         gItemPos=0;
         recyclerView =v.findViewById(R.id.rv_gallery);
