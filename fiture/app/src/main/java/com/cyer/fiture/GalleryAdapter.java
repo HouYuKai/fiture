@@ -22,12 +22,14 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.LinearVi
     private Context mContext;
     private OnItemClickListener mListener;
     private ArrayList<String> mList;
+    private int pos;
 
     public GalleryAdapter(Context context,OnItemClickListener listener,ArrayList<String> list){
         mContext=context;
         mListener=listener;
-
         mList=list;
+
+        pos=0;
     }
 
     @NonNull
@@ -38,11 +40,20 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.LinearVi
 
     @Override
     public void onBindViewHolder(@NonNull final GalleryAdapter.LinearViewHolder viewHolder, final int i) {
-        File file = new File(mList.get(0));
-        Glide.with(mContext).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).centerCrop().into(viewHolder.iv);
+        File file = new File(mList.get(i));
+        /*设置选中状态*/
+        if (pos == i) {
+            viewHolder.itemView.setBackgroundResource(R.drawable.gitem_border);
+        } else {
+            viewHolder.itemView.setBackgroundResource(R.drawable.gitem_border_tr);
+        }
+        Glide.with(mContext).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(viewHolder.iv);
+
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pos=i;
+                notifyDataSetChanged();
                 mListener.onClick(i);
             }
         });
@@ -50,16 +61,13 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.LinearVi
 
     @Override
     public int getItemCount() {
-        return 9;
+        return mList.size();
     }
 
 
     class LinearViewHolder extends RecyclerView.ViewHolder{
 
-//        private TextView tv;
         private ImageView iv;
-
-
         public LinearViewHolder(@NonNull View itemView) {
             super(itemView);
             iv=itemView.findViewById(R.id.iv_gitem);

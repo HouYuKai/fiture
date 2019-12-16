@@ -141,30 +141,9 @@ public class CameraFragment extends Fragment {
                 file = new File(pathList.get(i));
                 gItemPos=i;
                 Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).centerCrop().into(ivPreview);
-                Toast.makeText(chooseActivity,i+"",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(chooseActivity,i+"",Toast.LENGTH_SHORT).show();
             }
         }, pathList));
-
-        /*LinearLayout gallery = (LinearLayout) v.findViewById(R.id.id_gallery);
-        gallery.removeAllViews();  //clear linearlayout
-        for (i = 0; i < pathList.size(); i++) {
-            ImageView imageView = new ImageView(getContext());
-//            imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));  //设置图片宽高
-            imageView.setLayoutParams(new ViewGroup.LayoutParams(60, 60));  //设置图片宽高
-
-            Glide.with(this).load(new File(pathList.get(i))).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
-
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(chooseActivity, i+"", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            gallery.addView(imageView);
-            //imageView.setImageResource(R.drawable.ic_launcher); //图片资源
-            //Layout.addView(imageView); //动态添加图片
-        }*/
 
         btnPublish=v.findViewById(R.id.btn_publish);
         btnPublish.setOnClickListener(new View.OnClickListener() {
@@ -173,7 +152,6 @@ public class CameraFragment extends Fragment {
                 getActivity().finish();
             }
         });
-
 
         return v;
     }
