@@ -42,6 +42,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -72,6 +73,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import me.nereo.multi_image_selector.MultiImageSelector;
+
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class Camera2BasicFragment extends Fragment
         implements View.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback {
@@ -436,7 +439,11 @@ public class Camera2BasicFragment extends Fragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
+//        getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        //mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
+        mFile = new File(        getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                , "pic.jpg");
+
     }
 
     @Override

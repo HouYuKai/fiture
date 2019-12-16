@@ -3,6 +3,7 @@ package com.cyer.fiture;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +22,8 @@ import java.io.File;
 
 import jp.co.cyberagent.android.gpuimage.GPUImageView;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter;
+
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class FilterActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -91,15 +94,17 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
 
     private void saveImage() {
         String fileName = getIntent().getIntExtra("pos",0) + ".jpg";
+//        mGPUImageView.saveToPictures(getExternalFilesDir(null).toString(), fileName, mOnPictureSavedListener);
 
-        File file=new File(getExternalFilesDir(null).toString()+fileName);
+        File file=new File(getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/fiture/"+fileName);
         if (file.exists()){
             file.delete();
         }
+        //getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+
+        mGPUImageView.saveToPictures("fiture", fileName, mOnPictureSavedListener);
+        while (!file.exists()){
 
-        mGPUImageView.saveToPictures(getExternalFilesDir(null).toString(), fileName, mOnPictureSavedListener);
-
-//        mGPUImageView.saveToPictures("GPUImage", fileName, mOnPictureSavedListener);
+        }
     }
 
     /*@Override

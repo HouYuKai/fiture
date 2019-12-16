@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -33,6 +34,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 
 /**
@@ -103,6 +106,23 @@ public class PostEditFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+    public static boolean createDir(String dirPath){
+        //因为文件夹可能有多层，比如:  a/b/c/ff.txt  需要先创建a文件夹，然后b文件夹然后...
+        try{
+            File file=new File(dirPath);
+            if(file.getParentFile().exists()){
+                file.mkdir();
+                return true;
+            }
+            else {
+                createDir(file.getParentFile().getAbsolutePath());
+                file.mkdir();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return true;
+    }
 
     public boolean copyFile(String oldPath$Name, String newPath$Name) {
         try {
@@ -148,9 +168,12 @@ public class PostEditFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_camera, container, false);
         chooseActivity=(ChooseActivity) getActivity();
 
+        createDir(getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/fiture");
         pathList=new ArrayList<String>();
         for (int i=0;i<chooseActivity.getSelectPath().size();i++){
-            String newPath=getActivity().getExternalFilesDir(null).toString()+"/"+i+".jpg";
+//            String newPath=getActivity().getExternalFilesDir(null).toString()+"/"+i+".jpg";
+            String newPath=getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/fiture/"+i+".jpg";
+
             copyFile(chooseActivity.getSelectPath().get(i),newPath);
             pathList.add(newPath);
 //            chooseActivity.getSelectPath().get(i);
