@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -279,19 +280,26 @@ public class PostEditFragment extends Fragment {
         /*intent.putExtra("outputX", 150);
         intent.putExtra("outputY", 150);*/
         //intent.putExtra("editingPos",gItemPos);
-        intent.putExtra("return-data", true);
+        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        //intent.putExtra("return-data", true);
         chooseActivity.startActivityForResult(intent, 3);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-        file = new File(pathList.get(gItemPos));
-        //Toast.makeText(chooseActivity,"DO",Toast.LENGTH_SHORT).show();
-        Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
-        galleryAdapter.notifyItemChanged(gItemPos);
         /*if(requestCode == 4){//滤镜
             Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
         }*/
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                file = new File(pathList.get(gItemPos));
+                //Toast.makeText(chooseActivity,"DO",Toast.LENGTH_SHORT).show();
+                Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
+                galleryAdapter.notifyItemChanged(gItemPos);
+            }
+        }, 200);
     }
 
     private void showPopupMenu(View view) {
@@ -338,14 +346,13 @@ public class PostEditFragment extends Fragment {
                 return false;
             }
         });
-        // PopupMenu关闭事件
-        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
+        /*popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
             @Override
             public void onDismiss(PopupMenu menu) {
                 //Toast.makeText(chooseActivity, "取消Tag", Toast.LENGTH_SHORT).show();
                 //tagId=0;
             }
-        });
+        });*/
 
         popupMenu.show();
     }
@@ -548,6 +555,9 @@ public class PostEditFragment extends Fragment {
     }
 
     public boolean copyFile(String oldPath$Name, String newPath$Name) {
+        if (oldPath$Name.equals(newPath$Name)) {
+            return true;
+        }
         try {
             File oldFile = new File(oldPath$Name);
             if (!oldFile.exists()) {

@@ -484,8 +484,8 @@ public class Camera2BasicFragment extends Fragment
             if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
 //                ErrorDialog.newInstance(getString(R.string.request_permission))
 //                        .show(getChildFragmentManager(), FRAGMENT_DIALOG);
-                ErrorDialog.newInstance("ERROR")
-                        .show(getChildFragmentManager(), FRAGMENT_DIALOG);
+                /*ErrorDialog.newInstance("ERROR")
+                        .show(getChildFragmentManager(), FRAGMENT_DIALOG);*/
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);

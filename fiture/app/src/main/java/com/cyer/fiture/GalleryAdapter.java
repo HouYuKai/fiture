@@ -14,6 +14,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.LinearViewHolder> {
 
