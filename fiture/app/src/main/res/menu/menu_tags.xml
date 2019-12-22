@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/tag1"
+        android:title="生活" />
+    <item
+        android:id="@+id/tag2"
+        android:title="情感" />
+    <item
+        android:id="@+id/tag3"
+        android:title="时尚" />
+    <item
+        android:id="@+id/tag4"
+        android:title="历史" />
+    <item
+        android:id="@+id/tag5"
+        android:title="军事" />
+    <item
+        android:id="@+id/tag6"
+        android:title="教育" />
+    <item
+        android:id="@+id/tag7"
+        android:title="文化" />
+    <item
+        android:id="@+id/tag8"
+        android:title="娱乐" />
+    <item
+        android:id="@+id/tag9"
+        android:title="科技" />
+</menu>

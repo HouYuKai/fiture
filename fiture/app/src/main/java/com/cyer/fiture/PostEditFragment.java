@@ -1,7 +1,5 @@
 package com.cyer.fiture;
 
-import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -19,6 +17,7 @@ import android.text.TextPaint;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -26,13 +25,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
-import org.json.JSONException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
@@ -42,7 +42,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -82,6 +81,9 @@ public class PostEditFragment extends Fragment {
 
     public int gItemPos;
 
+    private int authorId=ChooseActivity.authorId;
+    private int tagId;
+
     private static final String TAG = "ChoAct";
 
     private ChooseActivity chooseActivity;
@@ -92,6 +94,7 @@ public class PostEditFragment extends Fragment {
     private ArrayList<String> pathList;
     private ImageView ivPreview;
     private ImageButton btnPublish;
+    private ImageButton btnAddTag;
 
     private GalleryAdapter galleryAdapter;
     private RecyclerView recyclerView;
@@ -109,6 +112,13 @@ public class PostEditFragment extends Fragment {
             {
                 case 0://response成功
                     llUploading.setVisibility(View.GONE);
+                    File file =new File(getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/fiture/"+0+".jpg");
+                    if (file.exists()){
+                        file.delete();
+                    }
+                    if (tagId!=0){
+                        runSetTag();
+                    }
                     getActivity().finish();
                     break;
                 case 1://response失败
@@ -118,6 +128,8 @@ public class PostEditFragment extends Fragment {
             }
         }
     };
+
+
 
     public PostEditFragment() {
         // Required empty public constructor
@@ -144,80 +156,26 @@ public class PostEditFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-    public static boolean createDir(String dirPath){
-        try{
-            File file=new File(dirPath);
-            if(file.getParentFile().exists()){
-                file.mkdir();
-                return true;
-            }
-            else {
-                createDir(file.getParentFile().getAbsolutePath());
-                file.mkdir();
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    public boolean copyFile(String oldPath$Name, String newPath$Name) {
-        try {
-            File oldFile = new File(oldPath$Name);
-            if (!oldFile.exists()) {
-                Log.e("--Method--", "copyFile:  oldFile not exist.");
-                return false;
-            } else if (!oldFile.isFile()) {
-                Log.e("--Method--", "copyFile:  oldFile not file.");
-                return false;
-            } else if (!oldFile.canRead()) {
-                Log.e("--Method--", "copyFile:  oldFile cannot read.");
-                return false;
-            }
-
-            FileInputStream fileInputStream = new FileInputStream(oldPath$Name);
-            FileOutputStream fileOutputStream = new FileOutputStream(newPath$Name);
-            byte[] buffer = new byte[1024];
-            int byteRead;
-            while (-1 != (byteRead = fileInputStream.read(buffer))) {
-                fileOutputStream.write(buffer, 0, byteRead);
-            }
-            fileInputStream.close();
-            fileOutputStream.flush();
-            fileOutputStream.close();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_camera, container, false);
+        View v = inflater.inflate(R.layout.fragment_post_edit, container, false);
         chooseActivity=(ChooseActivity) getActivity();
-
+        //图片文件预处理
         createDir(getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/fiture");
         pathList=new ArrayList<String>();
         for (int i=0;i<chooseActivity.getSelectPath().size();i++){
-//            String newPath=getActivity().getExternalFilesDir(null).toString()+"/"+i+".jpg";
             String newPath=getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/fiture/"+i+".jpg";
-
             copyFile(chooseActivity.getSelectPath().get(i),newPath);
             pathList.add(newPath);
-//            chooseActivity.getSelectPath().get(i);
         }
         chooseActivity.setSelectPath(pathList);
 
-        //pathList=chooseActivity.getSelectPath();
 
         //设置标题栏
         TextView titleEdit= v.findViewById(R.id.tv_titleEdit);
@@ -238,6 +196,13 @@ public class PostEditFragment extends Fragment {
             public void afterTextChanged(Editable s) {
                 int len=s.length();
                 tvWordcount.setText(len+"/140");
+            }
+        });
+        btnAddTag=v.findViewById(R.id.btn_addTag);
+        btnAddTag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopupMenu(btnAddTag);
             }
         });
 
@@ -323,12 +288,66 @@ public class PostEditFragment extends Fragment {
         file = new File(pathList.get(gItemPos));
         //Toast.makeText(chooseActivity,"DO",Toast.LENGTH_SHORT).show();
         Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
-
         galleryAdapter.notifyItemChanged(gItemPos);
-
         /*if(requestCode == 4){//滤镜
             Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
         }*/
+    }
+
+    private void showPopupMenu(View view) {
+        // View当前PopupMenu显示的相对View的位置
+        PopupMenu popupMenu = new PopupMenu(getContext(), view);
+        // menu布局
+        popupMenu.getMenuInflater().inflate(R.menu.menu_tags, popupMenu.getMenu());
+        // menu的item点击事件
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.tag1:
+                        tagId=1;
+                        break;
+                    case R.id.tag2:
+                        tagId=2;
+                        break;
+                    case R.id.tag3:
+                        tagId=3;
+                        break;
+                    case R.id.tag4:
+                        tagId=4;
+                        break;
+                    case R.id.tag5:
+                        tagId=5;
+                        break;
+                    case R.id.tag6:
+                        tagId=6;
+                        break;
+                    case R.id.tag7:
+                        tagId=7;
+                        break;
+                    case R.id.tag8:
+                        tagId=8;
+                        break;
+                    case R.id.tag9:
+                        tagId=9;
+                        break;
+                    default:
+                        break;
+                }
+                //Toast.makeText(chooseActivity, ""+tagId+item.getTitle(), Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+        // PopupMenu关闭事件
+        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
+            @Override
+            public void onDismiss(PopupMenu menu) {
+                //Toast.makeText(chooseActivity, "取消Tag", Toast.LENGTH_SHORT).show();
+                //tagId=0;
+            }
+        });
+
+        popupMenu.show();
     }
 
 
@@ -386,13 +405,15 @@ public class PostEditFragment extends Fragment {
         llUploading.setVisibility(View.VISIBLE);
         compressImage(pathList.get(0));
         String content=edDesc.getText().toString();
+        if (content.equals("")){
+            content="No description.";
+        }
         File file=new File(pathList.get(0));
         //Toast.makeText(this, input, Toast.LENGTH_SHORT).show();
-        String result=upload(content,2,file);
+        String result=upload(content,file);
 
     }
-    public String upload(String content,int authorId, File file) {
-
+    public String upload(String content, File file) {
         if(!file.exists()){
             return null;
         }
@@ -403,15 +424,11 @@ public class PostEditFragment extends Fragment {
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("multipartFile", filename, fileBody)
                 .build();
-
-
         // http://47.100.32.92:9888/v1/fitures/release?content=test%20up%201&authorId=1
         Request request = new Request.Builder()
                 .url("http://47.100.32.92:9888/v1/fitures/release?content="+content+"&authorId="+authorId)
                 .post(requestBody)
                 .build();
-
-
         try {
             final OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(10, TimeUnit.SECONDS)
@@ -460,6 +477,105 @@ public class PostEditFragment extends Fragment {
             Log.d(TAG,"Exception ",e);
         }
         return null;
+    }
+
+    public void runSetTag(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //OkHttpClient client = new OkHttpClient();
+                    OkHttpClient client = new OkHttpClient.Builder()
+                            .connectTimeout(10, TimeUnit.SECONDS)
+                            .readTimeout(20, TimeUnit.SECONDS)
+                            .build();
+                    Request request = new Request.Builder()
+                            .url("http://47.100.32.92:9888/v1/fitures/show?authorId="+authorId)
+                            .get()
+                            .build();
+                    Response response = null;
+                    String result=null;
+                    response = client.newCall(request).execute();//得到Response 对象
+                    if (response.isSuccessful()) {
+                        Log.d("settag","response.code()=="+response.code());
+                        Log.d("settag","response.message()=="+response.message());
+                        //Log.d("settag","res=="+response.body().string());
+                        //result = response.body().string();
+                        JSONArray array = new JSONArray(response.body().string());
+                        JSONObject tmpJO =array.getJSONObject(array.length()-1);
+                        Log.d("settag","JO=="+tmpJO.toString());
+
+
+                        int fitureId=tmpJO.getInt("fitureId");
+                        //开始设置标签
+                        RequestBody requestBody = new MultipartBody.Builder()
+                                .setType(MultipartBody.FORM)
+                                .addFormDataPart("labelId",""+tagId)
+                                .addFormDataPart("fitureId",""+fitureId)
+                                .build();
+                        request = new Request.Builder()
+                                .url("http://47.100.32.92:9888/v1/fitures/setLabel?labelId="+tagId+"&fitureId="+fitureId)
+                                .post(requestBody)
+                                .build();
+                        response = client.newCall(request).execute();
+
+                    }else {
+                        return;
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    public static boolean createDir(String dirPath){
+        try{
+            File file=new File(dirPath);
+            if(file.getParentFile().exists()){
+                file.mkdir();
+                return true;
+            }
+            else {
+                createDir(file.getParentFile().getAbsolutePath());
+                file.mkdir();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    public boolean copyFile(String oldPath$Name, String newPath$Name) {
+        try {
+            File oldFile = new File(oldPath$Name);
+            if (!oldFile.exists()) {
+                Log.e("--Method--", "copyFile:  oldFile not exist.");
+                return false;
+            } else if (!oldFile.isFile()) {
+                Log.e("--Method--", "copyFile:  oldFile not file.");
+                return false;
+            } else if (!oldFile.canRead()) {
+                Log.e("--Method--", "copyFile:  oldFile cannot read.");
+                return false;
+            }
+
+            FileInputStream fileInputStream = new FileInputStream(oldPath$Name);
+            FileOutputStream fileOutputStream = new FileOutputStream(newPath$Name);
+            byte[] buffer = new byte[1024];
+            int byteRead;
+            while (-1 != (byteRead = fileInputStream.read(buffer))) {
+                fileOutputStream.write(buffer, 0, byteRead);
+            }
+            fileInputStream.close();
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
     /**
      * This interface must be implemented by activities that contain this

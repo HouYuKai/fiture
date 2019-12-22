@@ -52,6 +52,18 @@
                 android:maxLines="4"
                 android:background="@null"
                 />
+            <ImageButton
+                android:id="@+id/btn_addTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/ed_desc"
+                android:paddingBottom="4dp"
+                android:paddingLeft="4dp"
+                android:src="@drawable/ic_label_black_24dp"
+                android:background="@null"
+                />
+
             <TextView
                 android:id="@+id/tv_desc_wordcount"
                 android:layout_width="wrap_content"

@@ -10,6 +10,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -45,6 +46,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static android.os.Environment.getExternalStoragePublicDirectory;
+
 
 public class ChooseActivity extends AppCompatActivity implements PostEditFragment.OnFragmentInteractionListener{
 
@@ -53,7 +56,7 @@ public class ChooseActivity extends AppCompatActivity implements PostEditFragmen
     protected static final int REQUEST_STORAGE_WRITE_ACCESS_PERMISSION = 102;
     private static final String TAG = "ChoAct";
 
-
+    public static int authorId=2;
     private ArrayList<String> mSelectPath;
 
     @Override
@@ -84,6 +87,8 @@ public class ChooseActivity extends AppCompatActivity implements PostEditFragmen
         }else {
             //权限已授予
         }
+
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(R.id.frcontainer,Camera2BasicFragment.newInstance(),"f1")
@@ -146,16 +151,15 @@ public class ChooseActivity extends AppCompatActivity implements PostEditFragmen
 
         Fragment fr=getSupportFragmentManager().findFragmentByTag("postedit");
         if(requestCode == 3){
-                /*getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.frcontainer, PostEditFragment.newInstance("1","2"),"f1")
-                        .commit();*/
-                //showToast("do3");
+            if (fr != null) {
                 fr.onActivityResult(requestCode,resultCode,data);
+            }
         }
 
         if(requestCode == 4){//滤镜
-            fr.onActivityResult(requestCode,resultCode,data);
+            if (fr != null) {
+                fr.onActivityResult(requestCode,resultCode,data);
+            }
         }
     }
 
