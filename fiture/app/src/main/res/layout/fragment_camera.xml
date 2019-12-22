@@ -5,10 +5,12 @@
     android:layout_height="match_parent"
     tools:context=".PostEditFragment">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -31,15 +33,13 @@
                 android:layout_marginRight="20dp"
                 android:layout_gravity="center_vertical|end"
                 android:background="@drawable/ic_send_black_24dp"/>
-
         </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:background="@drawable/ed_desc_background"
-            >
+            android:background="@drawable/ed_desc_background">
             <EditText
                 android:id="@+id/ed_desc"
                 android:layout_width="match_parent"
@@ -68,6 +68,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="#000"
             android:layout_weight="1">
 
             <ScrollView
@@ -76,7 +77,9 @@
                 <ImageView
                     android:id="@+id/iv_preview"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"/>
             </ScrollView>
 
             <Button
@@ -84,7 +87,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:text="cut"/>
+                android:text="cut"
+                />
             <Button
                 android:id="@+id/btn_filter"
                 android:layout_width="wrap_content"
@@ -98,7 +102,32 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_gallery"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:background="@color/colorTitle"/>
+            android:layout_height="0dp"
+            android:background="@color/colorTitle"
+            android:visibility="invisible"/>
+
+
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/ll_uploading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:background="#52000000"
+        android:visibility="gone">
+        <com.github.ybq.android.spinkit.SpinKitView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/spin_kit"
+            style="@style/SpinKitView.Large.Wave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:SpinKit_Color="#FFF" />
+    </LinearLayout>
+    <!--<ImageView
+        android:id="@+id/iv_uploading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@mipmap/cloud_done"
+        android:visibility="gone"/>-->
 </FrameLayout>

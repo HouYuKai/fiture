@@ -55,12 +55,12 @@
 <!--        style="@android:style/Widget.Material.Light.Button.Borderless"-->
         <ImageButton
             android:id="@+id/info"
-            android:contentDescription="Album"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginRight="40dp"
             android:layout_gravity="center_vertical|right"
+            android:layout_marginRight="40dp"
             android:background="#00FFFFFF"
+            android:contentDescription="Album"
             android:foreground="@drawable/ic_photo_library_black_24dp" />
 
     </FrameLayout>

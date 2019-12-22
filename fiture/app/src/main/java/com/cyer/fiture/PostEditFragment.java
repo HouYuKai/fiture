@@ -1,5 +1,6 @@
 package com.cyer.fiture;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,18 +25,35 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
@@ -62,6 +82,8 @@ public class PostEditFragment extends Fragment {
 
     public int gItemPos;
 
+    private static final String TAG = "ChoAct";
+
     private ChooseActivity chooseActivity;
 
     private EditText edDesc;
@@ -74,6 +96,28 @@ public class PostEditFragment extends Fragment {
     private GalleryAdapter galleryAdapter;
     private RecyclerView recyclerView;
     private OnFragmentInteractionListener mListener;
+
+//    private ImageView ivUploading;
+    private LinearLayout llUploading;
+
+
+    private Handler handler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what)
+            {
+                case 0://response成功
+                    llUploading.setVisibility(View.GONE);
+                    getActivity().finish();
+                    break;
+                case 1://response失败
+                    llUploading.setVisibility(View.GONE);
+                    Toast.makeText(chooseActivity,"发送失败，请检查网络后重试",Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
 
     public PostEditFragment() {
         // Required empty public constructor
@@ -107,7 +151,6 @@ public class PostEditFragment extends Fragment {
         }
     }
     public static boolean createDir(String dirPath){
-        //因为文件夹可能有多层，比如:  a/b/c/ff.txt  需要先创建a文件夹，然后b文件夹然后...
         try{
             File file=new File(dirPath);
             if(file.getParentFile().exists()){
@@ -137,12 +180,6 @@ public class PostEditFragment extends Fragment {
                 Log.e("--Method--", "copyFile:  oldFile cannot read.");
                 return false;
             }
-
-            /* 如果不需要打log，可以使用下面的语句
-            if (!oldFile.exists() || !oldFile.isFile() || !oldFile.canRead()) {
-                return false;
-            }
-            */
 
             FileInputStream fileInputStream = new FileInputStream(oldPath$Name);
             FileOutputStream fileOutputStream = new FileOutputStream(newPath$Name);
@@ -203,6 +240,10 @@ public class PostEditFragment extends Fragment {
                 tvWordcount.setText(len+"/140");
             }
         });
+
+        llUploading=v.findViewById(R.id.ll_uploading);
+
+
         //图片预览区
         ivPreview=v.findViewById(R.id.iv_preview);
         file = new File(pathList.get(0));
@@ -227,7 +268,6 @@ public class PostEditFragment extends Fragment {
                 intent.putExtra("originPath", pathList.get(gItemPos));
                 intent.putExtra("pos", gItemPos);
                 chooseActivity.startActivityForResult(intent,4);
-                //startActivity(intent);
             }
         });
 
@@ -253,7 +293,7 @@ public class PostEditFragment extends Fragment {
         btnPublish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().finish();
+                doPublish();
             }
         });
 
@@ -285,116 +325,13 @@ public class PostEditFragment extends Fragment {
         Glide.with(chooseActivity).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
 
         galleryAdapter.notifyItemChanged(gItemPos);
-        /*if (requestCode==3){
-            Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
 
-        }
-        if(requestCode == 4){//滤镜
+        /*if(requestCode == 4){//滤镜
             Glide.with(this).load(file).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(ivPreview);
-
         }*/
     }
 
-    /**
-     * 读取一个缩放后的图片，限定图片大小，避免OOM
-     * http://blog.sina.com.cn/s/blog_5de73d0b0100zfm8.html
-     * @param uri       图片uri，支持“file://”、“content://”
-     * @param maxWidth  最大允许宽度
-     * @param maxHeight 最大允许高度
-     * @return  返回一个缩放后的Bitmap，失败则返回null
-     */
-    public static Bitmap decodeUri(Context context, Uri uri, int maxWidth, int maxHeight) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true; //只读取图片尺寸
-        resolveUri(context, uri, options);
 
-        //计算实际缩放比例
-        int scale = 1;
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
-            if ((options.outWidth / scale > maxWidth &&
-                    options.outWidth / scale > maxWidth * 1.4) ||
-                    (options.outHeight / scale > maxHeight &&
-                            options.outHeight / scale > maxHeight * 1.4)) {
-                scale++;
-            } else {
-                break;
-            }
-        }
-
-        options.inSampleSize = scale;
-        options.inJustDecodeBounds = false;//读取图片内容
-        options.inPreferredConfig = Bitmap.Config.RGB_565; //根据情况进行修改
-        Bitmap bitmap = null;
-        try {
-            bitmap = resolveUriForBitmap(context, uri, options);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        return bitmap;
-    }
-
-    private static void resolveUri(Context context, Uri uri, BitmapFactory.Options options) {
-        if (uri == null) {
-            return;
-        }
-
-        String scheme = uri.getScheme();
-        if (ContentResolver.SCHEME_CONTENT.equals(scheme) ||
-                ContentResolver.SCHEME_FILE.equals(scheme)) {
-            InputStream stream = null;
-            try {
-                stream = context.getContentResolver().openInputStream(uri);
-                BitmapFactory.decodeStream(stream, null, options);
-            } catch (Exception e) {
-                Log.w("resolveUri", "Unable to open content: " + uri, e);
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        Log.w("resolveUri", "Unable to close content: " + uri, e);
-                    }
-                }
-            }
-        } else if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)) {
-            Log.w("resolveUri", "Unable to close content: " + uri);
-        } else {
-            Log.w("resolveUri", "Unable to close content: " + uri);
-        }
-    }
-
-    private static Bitmap resolveUriForBitmap(Context context, Uri uri, BitmapFactory.Options options) {
-        if (uri == null) {
-            return null;
-        }
-
-        Bitmap bitmap = null;
-        String scheme = uri.getScheme();
-        if (ContentResolver.SCHEME_CONTENT.equals(scheme) ||
-                ContentResolver.SCHEME_FILE.equals(scheme)) {
-            InputStream stream = null;
-            try {
-                stream = context.getContentResolver().openInputStream(uri);
-                bitmap = BitmapFactory.decodeStream(stream, null, options);
-            } catch (Exception e) {
-                Log.w("resolveUriForBitmap", "Unable to open content: " + uri, e);
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        Log.w("resolveUriForBitmap", "Unable to close content: " + uri, e);
-                    }
-                }
-            }
-        } else if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)) {
-            Log.w("resolveUriForBitmap", "Unable to close content: " + uri);
-        } else {
-            Log.w("resolveUriForBitmap", "Unable to close content: " + uri);
-        }
-
-        return bitmap;
-    }
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -419,6 +356,111 @@ public class PostEditFragment extends Fragment {
         mListener = null;
     }
 
+    private void compressImage(String filePath) {
+        Bitmap image=BitmapFactory.decodeFile(filePath);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 100, baos);//质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
+        int options = 100;
+        while ( baos.toByteArray().length / 1024> 1024) {  //循环判断如果压缩后图片是否大于1024kb,大于继续压缩
+            baos.reset();//重置baos即清空baos
+            image.compress(Bitmap.CompressFormat.JPEG, options, baos);//这里压缩options%，把压缩后的数据存放到baos中
+            options -= 10;//每次都减少10
+        }
+        ByteArrayInputStream isBm = new ByteArrayInputStream(baos.toByteArray());//把压缩后的数据baos存放到ByteArrayInputStream中
+        Bitmap bitmap = BitmapFactory.decodeStream(isBm, null, null);//把ByteArrayInputStream数据生成图片
+
+        File file=new File(filePath);//将要保存图片的路径
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            bos.flush();
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*发布操作*/
+    private void doPublish(){
+        llUploading.setVisibility(View.VISIBLE);
+        compressImage(pathList.get(0));
+        String content=edDesc.getText().toString();
+        File file=new File(pathList.get(0));
+        //Toast.makeText(this, input, Toast.LENGTH_SHORT).show();
+        String result=upload(content,2,file);
+
+    }
+    public String upload(String content,int authorId, File file) {
+
+        if(!file.exists()){
+            return null;
+        }
+        String filename = file.getName();
+        RequestBody fileBody = RequestBody.create(MediaType.parse("image/*"), file);
+
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("multipartFile", filename, fileBody)
+                .build();
+
+
+        // http://47.100.32.92:9888/v1/fitures/release?content=test%20up%201&authorId=1
+        Request request = new Request.Builder()
+                .url("http://47.100.32.92:9888/v1/fitures/release?content="+content+"&authorId="+authorId)
+                .post(requestBody)
+                .build();
+
+
+        try {
+            final OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .build();
+            //response = client.newCall(request).execute();
+            Call call = client.newCall(request);
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                    Message message = new Message();
+                    message.what = 1;
+                    message.obj = "time over";
+                    handler.sendMessage(message);
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String jsonString = response.body().string();
+                    Log.d(TAG," upload jsonString ="+jsonString);
+
+                    if(!response.isSuccessful()){
+                        Log.d(TAG," upload error");
+                        Message message = new Message();
+                        message.what = 1;
+                        message.obj = jsonString;
+                        handler.sendMessage(message);
+                    }else{
+                        /*JSONObject jsonObject = new JSONObject(jsonString);
+                        int errorCode = jsonObject.getInt("errorCode");
+                        if(errorCode == 0){
+                            Log.d(TAG," upload data ="+jsonObject.getString("data"));
+                            return jsonObject.getString("data");
+                        }else {
+                            //throw new NetworkException("upload error code "+errorCode+",errorInfo="+jsonObject.getString("errorInfo"));
+                        }*/
+                        Message message = new Message();
+                        message.what = 0;
+                        message.obj = "?";
+                        handler.sendMessage(message);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG,"Exception ",e);
+        }
+        return null;
+    }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated

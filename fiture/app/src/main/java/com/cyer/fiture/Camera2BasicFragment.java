@@ -939,17 +939,17 @@ public class Camera2BasicFragment extends Fragment
 
     private void showSelector() {
 
-            int maxNum = 9;
+            int maxNum = 1;
             MultiImageSelector selector = MultiImageSelector.create(getContext());
             selector.showCamera(false);
             selector.count(maxNum);
 
             ArrayList<String> mSelectPath=new ArrayList<>();
 
-            selector.multi();
+//            selector.multi();
+            selector.single();
             selector.origin(mSelectPath);
             selector.start(getActivity(), 2);
-
     }
 
     private void setAutoFlash(CaptureRequest.Builder requestBuilder) {
@@ -1060,7 +1060,7 @@ public class Camera2BasicFragment extends Fragment
             final Fragment parent = getParentFragment();
             return new AlertDialog.Builder(getActivity())
                     //.setMessage(R.string.request_permission)
-                    .setMessage("request_permission")
+                    .setMessage("请打开相机权限")
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
