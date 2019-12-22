@@ -93,4 +93,6 @@
     <string name="levels_min_mid_adjust">色阶</string>
     <string name="bilateral_blur">双边模糊</string>
     <string name="transform_2d">形状变化（2D）</string>
+    <string name="cut">裁剪</string>
+    <string name="filter">滤镜</string>
 </resources>
